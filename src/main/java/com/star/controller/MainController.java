@@ -6,11 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -46,9 +50,45 @@ public class MainController {
     }
 
     @RequestMapping(value = "/users/addP" ,method = RequestMethod.POST)
-    public String addUser(@ModelAttribute("user") UserEntity user){
+    public String addUser(@Valid UserEntity user, Errors errors){
+        System.out.println(errors.hasErrors());
+        System.out.println(user.getNickname());
+        System.out.println(user.getNickname().length());
+        if (errors.hasErrors()){
+            return "addPage";
+        }
         userRepository.saveAndFlush(user);
         //立即刷新
         return "redirect:/users";
     }
+
+    @RequestMapping(value = "/users/show/{userId}")
+    public String showDetail(@PathVariable("userId") Integer userId,Model model){
+        model.addAttribute("user",userRepository.findOne(userId));
+        return "userDetail";
+    }
+
+    @RequestMapping(value = "/users/delete/{userId}")
+    public String deleteUser(@PathVariable("userId") Integer userId){
+        userRepository.delete(userId);
+        userRepository.flush();
+        return "redirect:/users";
+    }
+
+    @RequestMapping(value = "/users/update/{id}",method = RequestMethod.GET)
+    public String updatePage(@PathVariable("id") Integer userId,Model model){
+        model.addAttribute("user",userRepository.findOne(userId));
+        return "updateUser";
+    }
+
+    @RequestMapping(value = "/users/updateP",method = RequestMethod.POST)
+    public String updateUser(UserEntity user){
+        userRepository.updateUser(user.getNickname(), user.getFirstName(),
+                user.getLastName(), user.getPassword(), user.getId());
+        userRepository.flush();
+        return "redirect:/users";
+    }
+
+
+
 }

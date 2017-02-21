@@ -17,9 +17,14 @@ public class UserEntity {
     @NotNull
     @Size(min = 5,max = 15)
     private String nickname;
-
+    @NotNull
+    @Size(min = 5,max = 15)
     private String password;
+    @NotNull
+    @Size(min = 5,max = 20)
     private String firstName;
+    @NotNull
+    @Size(min = 5,max = 20)
     private String lastName;
 
     @Id
